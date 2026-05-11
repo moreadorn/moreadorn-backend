@@ -1,5 +1,6 @@
 from django.urls import path
 
+from .cron_views import DBHealthCronView
 from .views import (
     AdminLoginView,
     AdminLogoutView,
@@ -69,4 +70,6 @@ urlpatterns = [
         AdminResetPasswordView.as_view(),
         name="admin-reset-password",
     ),
+    # ----- Cron jobs (hit by Vercel scheduler) -----
+    path("cron/db-health/", DBHealthCronView.as_view(), name="cron-db-health"),
 ]

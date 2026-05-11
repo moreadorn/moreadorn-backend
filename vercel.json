@@ -23,5 +23,11 @@
       "src": "/(.*)",
       "dest": "importexportmanage/wsgi.py"
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/db-health/",
+      "schedule": "0 */2 * * *"
+    }
   ]
 }
