@@ -1,8 +1,10 @@
 import logging
+from datetime import datetime, timezone
 
 import requests
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from django.db import connection
 from rest_framework import generics, permissions, status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
@@ -38,6 +40,40 @@ from .mail_manage import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+# =====================================================================
+# HEALTH CHECK - public liveness probe
+# =====================================================================
+class HealthCheckView(APIView):
+    """Lightweight public endpoint for uptime monitors / load balancers.
+
+    Returns 200 with a small JSON payload describing service + database
+    status. The DB ping is a no-side-effect `SELECT 1`; no email is sent
+    here (the scheduled cron handles alerting).
+    """
+
+    permission_classes = [permissions.AllowAny]
+    authentication_classes: list = []
+
+    def get(self, _request):
+        db_ok = True
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT 1")
+                cursor.fetchone()
+        except Exception:
+            db_ok = False
+
+        return Response(
+            {
+                "status": "ok" if db_ok else "degraded",
+                "service": "moreadorn-backend",
+                "database": "up" if db_ok else "down",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 # =====================================================================

@@ -2,6 +2,7 @@ from django.urls import path
 
 from .cron_views import DBHealthCronView
 from .views import (
+    HealthCheckView,
     AdminLoginView,
     AdminLogoutView,
     AdminMeView,
@@ -27,6 +28,9 @@ from .views import (
 )
 
 urlpatterns = [
+    # ----- Public health check -----
+    path("health/", HealthCheckView.as_view(), name="health-check"),
+
     path("products/", ProductListCreateView.as_view(), name="product-list-create"),
     path("products/<uuid:pk>/", ProductDetailView.as_view(), name="product-detail"),
     path("markets/", MarketListCreateView.as_view(), name="market-list-create"),
